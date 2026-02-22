@@ -2,10 +2,10 @@
 
 The app has two parts:
 
-1. **Frontend** (HTML/CSS/JS) → deploy to **Netlify**
+1. **Frontend** (HTML/CSS/JS) → deploy to **Netlify** or **GitHub Pages**
 2. **Backend** (Flask API + CSV data) → deploy to **Render** (or another Python host)
 
-Netlify only serves static files and cannot run your Flask server. So you deploy the frontend on Netlify and the API on Render, then connect them with the API URL.
+Netlify and GitHub Pages only serve static files; they cannot run your Flask server. So you deploy the frontend on one of them and the API on Render, then connect them with the API URL.
 
 ---
 
@@ -86,12 +86,37 @@ The backend reads `youtube_api_cleaned_data.csv` from the repo root. Either:
 
 ---
 
+## Deploy frontend to GitHub Pages
+
+1. **Deploy the backend** on Render first (see Step 1 above) and note the API URL (e.g. `https://youtube-trend-tracer-api.onrender.com`).
+
+2. **Add the API URL as a secret** in your GitHub repo:
+   - Repo → **Settings** → **Secrets and variables** → **Actions**
+   - **New repository secret**
+   - Name: `API_URL`
+   - Value: your Render backend URL (no trailing slash)
+
+3. **Enable GitHub Pages to use Actions:**
+   - Repo → **Settings** → **Pages**
+   - Under **Build and deployment**, set **Source** to **GitHub Actions**.
+
+4. **Deploy:** Push to the `main` branch (or run the workflow manually: **Actions** → **Deploy to GitHub Pages** → **Run workflow**). The workflow will:
+   - Run `node scripts/inject-env.js` with `API_URL` from secrets
+   - Deploy the `frontend` folder to GitHub Pages
+
+5. Your site will be at `https://<username>.github.io/<repo-name>/` (e.g. `https://myuser.github.io/youtube-trend-tracer/`).
+
+**Note:** If your default branch is not `main`, edit `.github/workflows/deploy-pages.yml` and change `branches: [main]` to your branch (e.g. `master`).
+
+---
+
 ## Summary
 
-| Part      | Where   | URL you get |
-|----------|---------|-------------|
-| Frontend | Netlify | `https://your-site.netlify.app` |
-| Backend  | Render  | `https://your-api.onrender.com` |
+| Part      | Where        | URL you get |
+|----------|---------------|-------------|
+| Frontend | Netlify       | `https://your-site.netlify.app` |
+| Frontend | GitHub Pages  | `https://<username>.github.io/<repo-name>/` |
+| Backend  | Render        | `https://your-api.onrender.com` |
 
 - Set **Render** URL as **`API_URL`** in Netlify.
 - Commit and push changes; Netlify and Render will redeploy from your GitHub repo.

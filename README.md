@@ -32,9 +32,9 @@ Fetch trending YouTube videos (India), analyze engagement, and view results in a
 - **API**: `GET /api/trends` — returns trends from CSV  
 - **Refresh**: `POST /api/trends/refresh` — re-runs the pipeline and returns new data (can take ~30s)
 
-## Deploy to Netlify
+## Deploy (Netlify or GitHub Pages)
 
-The **frontend** deploys to Netlify; the **backend** (Flask API) must be deployed elsewhere (e.g. Render) because Netlify only serves static files. See **[DEPLOY.md](DEPLOY.md)** for step-by-step Netlify + Render deployment and how to set the `API_URL` env var so the site talks to your API.
+The **frontend** can be deployed to **Netlify** or **GitHub Pages**; the **backend** (Flask API) must be deployed elsewhere (e.g. Render) because both only serve static files. See **[DEPLOY.md](DEPLOY.md)** for step-by-step instructions and how to set `API_URL` so the site talks to your API.
 
 ## Project layout
 
@@ -42,4 +42,5 @@ The **frontend** deploys to Netlify; the **backend** (Flask API) must be deploye
 - `backend/app.py` — Flask API and static file server for the frontend
 - `frontend/` — HTML, CSS, JS for the trend list and filters
 - `netlify.toml` — Netlify build config (publish `frontend`, inject `API_URL`)
-- `DEPLOY.md` — Full deployment guide (Netlify + Render)
+- `.github/workflows/deploy-pages.yml` — GitHub Actions workflow for GitHub Pages
+- `DEPLOY.md` — Full deployment guide (Netlify, GitHub Pages, Render)

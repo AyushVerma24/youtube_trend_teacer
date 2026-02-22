@@ -1,0 +1,14 @@
+# Render Blueprint: deploy Flask API for YouTube Trend Tracer
+# Docs: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: youtube-trend-tracer-api
+    runtime: python
+    region: oregon
+
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: gunicorn backend.app:app
+
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
