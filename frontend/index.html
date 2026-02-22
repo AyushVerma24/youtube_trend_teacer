@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YouTube Trend Tracer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon" aria-hidden="true">▶</span>
+        <h1>YouTube Trend Tracer</h1>
+      </div>
+      <p class="tagline">Trending videos & engagement metrics</p>
+      <div class="actions">
+        <button type="button" class="btn btn-primary" id="btn-refresh" disabled>
+          <span class="btn-text">Refresh trends</span>
+          <span class="btn-loading" aria-hidden="true">Updating…</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main">
+    <section class="stats" id="stats" aria-live="polite">
+      <!-- Filled by JS -->
+    </section>
+
+    <section class="filter-section" id="filter-section">
+      <h2 class="filter-section-title">Filters</h2>
+      <div class="filters" id="filters">
+        <label class="filter-label">
+          <span>Country</span>
+          <select id="filter-country" aria-label="Filter by country/region">
+            <option value="all">All</option>
+          </select>
+        </label>
+        <label class="filter-label">
+          <span>Language</span>
+          <select id="filter-language" aria-label="Filter by language">
+            <option value="all">All</option>
+          </select>
+        </label>
+        <label class="filter-label">
+          <span>Category</span>
+          <select id="filter-category" aria-label="Filter by category">
+            <option value="all">All</option>
+          </select>
+        </label>
+        <label class="filter-label">
+          <span>Viral</span>
+          <select id="filter-viral" aria-label="Filter by viral">
+            <option value="all">All</option>
+            <option value="1">Viral only</option>
+            <option value="0">Non-viral</option>
+          </select>
+        </label>
+        <label class="filter-label">
+          <span>Engagement</span>
+          <select id="filter-engagement" aria-label="Filter by engagement level">
+            <option value="all">All</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </label>
+        <label class="filter-label filter-label-date">
+          <span>From</span>
+          <input type="datetime-local" id="filter-time-from" aria-label="From date and time" />
+        </label>
+        <label class="filter-label filter-label-date">
+          <span>To</span>
+          <input type="datetime-local" id="filter-time-to" aria-label="To date and time" />
+        </label>
+        <label class="filter-label">
+          <span>Sort by</span>
+          <select id="sort-by" aria-label="Sort by">
+            <option value="views">Views</option>
+            <option value="likes">Likes</option>
+            <option value="comment_count">Comments</option>
+            <option value="engagement_score">Engagement</option>
+            <option value="title">Title A–Z</option>
+          </select>
+        </label>
+      </div>
+    </section>
+
+    <div class="loading" id="loading" role="status" aria-live="polite">
+      <div class="spinner"></div>
+      <p>Loading trends…</p>
+    </div>
+
+    <div class="error" id="error" role="alert" hidden>
+      <p id="error-message"></p>
+      <button type="button" class="btn btn-secondary" id="btn-retry">Try again</button>
+    </div>
+
+    <ul class="trend-list" id="trend-list" aria-live="polite"></ul>
+  </main>
+
+  <footer class="footer">
+    <p>Data from YouTube API · Refreshing runs the analysis pipeline</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
