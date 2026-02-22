@@ -1,4 +1,4 @@
-const API_BASE = "";
+const API_BASE = (typeof window !== "undefined" && window.__API_BASE__ !== undefined) ? window.__API_BASE__ : "";
 
 const $ = (id) => document.getElementById(id);
 const loadingEl = $("loading");

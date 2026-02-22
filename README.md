@@ -32,8 +32,14 @@ Fetch trending YouTube videos (India), analyze engagement, and view results in a
 - **API**: `GET /api/trends` — returns trends from CSV  
 - **Refresh**: `POST /api/trends/refresh` — re-runs the pipeline and returns new data (can take ~30s)
 
+## Deploy to Netlify
+
+The **frontend** deploys to Netlify; the **backend** (Flask API) must be deployed elsewhere (e.g. Render) because Netlify only serves static files. See **[DEPLOY.md](DEPLOY.md)** for step-by-step Netlify + Render deployment and how to set the `API_URL` env var so the site talks to your API.
+
 ## Project layout
 
 - `main.py` — Fetches from YouTube API, cleans data, trains a viral classifier, saves CSV
 - `backend/app.py` — Flask API and static file server for the frontend
 - `frontend/` — HTML, CSS, JS for the trend list and filters
+- `netlify.toml` — Netlify build config (publish `frontend`, inject `API_URL`)
+- `DEPLOY.md` — Full deployment guide (Netlify + Render)

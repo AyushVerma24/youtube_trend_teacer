@@ -1,0 +1,11 @@
+# Netlify config for YouTube Trend Tracer (frontend)
+# Backend (Flask API) must be deployed separately (e.g. Render) and set in API_URL.
+
+[build]
+  command = "node scripts/inject-env.js"
+  publish = "frontend"
+
+[build.environment]
+  # Set API_URL in Netlify dashboard: Site settings → Environment variables
+  # Example: API_URL = https://your-app-name.onrender.com
+  NODE_VERSION = "18"
