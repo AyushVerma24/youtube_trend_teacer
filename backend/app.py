@@ -7,25 +7,27 @@ import subprocess
 import sys
 
 import pandas as pd
-from flask import Flask, jsonify, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 
 app = Flask(__name__, static_folder="../frontend", static_url_path="")
 
-# Allow frontend (Netlify + local) to call the API
+# Allow frontend (GitHub Pages, Netlify, local) to call the API
 CORS(
     app,
     resources={r"/api/*": {"origins": "*"}},
     allow_headers=["Content-Type"],
     methods=["GET", "POST", "OPTIONS"],
+    supports_credentials=False,
 )
 
 @app.after_request
 def add_cors_headers(response):
-    """Ensure CORS headers are on every response (including errors)."""
+    """Ensure CORS headers are on every response (including errors and cold start)."""
     response.headers["Access-Control-Allow-Origin"] = "*"
     response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
     response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    response.headers["Access-Control-Max-Age"] = "86400"
     return response
 
 # Path to project root and CSV
@@ -62,16 +64,20 @@ def load_trends():
     return df.to_dict(orient="records")
 
 
-@app.route("/api/trends")
+@app.route("/api/trends", methods=["GET", "OPTIONS"])
 def get_trends():
     """Return current trends from CSV."""
+    if request.method == "OPTIONS":
+        return "", 204
     data = load_trends()
     return jsonify({"trends": data, "count": len(data)})
 
 
-@app.route("/api/trends/refresh", methods=["POST"])
+@app.route("/api/trends/refresh", methods=["POST", "OPTIONS"])
 def refresh_trends():
     """Re-run the pipeline (main.py) and return updated trends."""
+    if request.method == "OPTIONS":
+        return "", 204
     try:
         subprocess.run(
             [sys.executable, MAIN_SCRIPT],
