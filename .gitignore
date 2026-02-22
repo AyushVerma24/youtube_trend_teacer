@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+*.egg-info/
+.eggs/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Logs and temp
+*.log
+run_*.txt
+out.txt
+
+# Optional: uncomment to avoid committing large CSV (generate via main.py or Refresh)
+# youtube_api_cleaned_data.csv

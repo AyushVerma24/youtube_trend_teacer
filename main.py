@@ -2,8 +2,10 @@
 # YOUTUBE API BASED TREND ANALYSIS PROJECT
 # ==========================================
 
-import sys
 import io
+import sys
+import time
+
 # Fix Windows console encoding for Unicode (e.g. emoji in video titles)
 if sys.platform == "win32":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
@@ -80,8 +82,6 @@ def detect_language(title):
 
 
 # Fetch trending videos from multiple regions and combine
-import time
-
 dfs = []
 for region in TRENDING_REGIONS:
     try:
