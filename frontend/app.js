@@ -17,6 +17,25 @@ const filterTimeFrom = $("filter-time-from");
 const filterTimeTo = $("filter-time-to");
 const sortBy = $("sort-by");
 
+// Modal elements
+const modal = $("trend-modal");
+const modalBackdrop = $("trend-modal-backdrop");
+const modalTitle = $("trend-modal-title");
+const modalSubtitle = $("trend-modal-subtitle");
+const modalBody = $("trend-modal-body");
+const modalClose = $("trend-modal-close");
+const modalCloseSecondary = $("trend-modal-close-secondary");
+const modalOpenYoutube = $("trend-modal-open-youtube");
+
+const headerEl = document.querySelector(".header");
+const rootStyle = document.documentElement.style;
+
+const pageSizeSelect = $("page-size");
+const paginationInfo = $("pagination-info");
+const pageIndicator = $("page-indicator");
+const pagePrev = $("page-prev");
+const pageNext = $("page-next");
+
 // YouTube category ID → display name
 const CATEGORY_NAMES = {
   1: "Film & Animation",
@@ -87,6 +106,9 @@ const LANGUAGE_NAMES = {
 };
 
 let allTrends = [];
+let currentTrend = null;
+let pageSize = 20;
+let currentPage = 1;
 
 function setLoading(show) {
   loadingEl.classList.toggle("hidden", !show);
@@ -148,6 +170,7 @@ function renderTrendCard(t) {
   const engagement = t.engagement_score != null ? (Number(t.engagement_score) * 100).toFixed(2) + "%" : "—";
   const li = document.createElement("li");
   li.className = "trend-card" + (viral ? " viral" : "");
+  li.tabIndex = 0;
   li.innerHTML = `
     <h2 class="trend-title">${escapeHtml(t.title || "Untitled")}</h2>
     <div class="trend-meta">
@@ -161,6 +184,16 @@ function renderTrendCard(t) {
       <span class="badge badge-engagement">Engagement ${engagement}</span>
     </div>
   `;
+
+  const open = () => openTrendModal(t);
+  li.addEventListener("click", open);
+  li.addEventListener("keypress", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      open();
+    }
+  });
+
   return li;
 }
 
@@ -184,6 +217,81 @@ function getCountryName(code) {
 function getLanguageName(code) {
   const l = code != null ? String(code).toLowerCase().trim() : "";
   return LANGUAGE_NAMES[l] || (l ? l.toUpperCase() : "Unknown");
+}
+
+function getYoutubeUrl(trend) {
+  if (!trend || !trend.video_id) return null;
+  return `https://www.youtube.com/watch?v=${encodeURIComponent(trend.video_id)}`;
+}
+
+function openTrendModal(trend) {
+  currentTrend = trend;
+  modalTitle.textContent = trend.title || "Untitled";
+
+  const country = getCountryName(trend.region);
+  const language = getLanguageName(trend.language || "unknown");
+  const category = getCategoryName(trend.category_id);
+  const published = formatDate(trend.publish_time);
+  const viral = Number(trend.viral) === 1;
+  const engagement = trend.engagement_score != null ? (Number(trend.engagement_score) * 100).toFixed(2) + "%" : "—";
+
+  modalSubtitle.textContent = `${country} • ${category} • ${published}`;
+
+  modalBody.innerHTML = `
+    <dl class="modal-details">
+      <div class="modal-details-item">
+        <dt>Country</dt>
+        <dd>${country}</dd>
+      </div>
+      <div class="modal-details-item">
+        <dt>Language</dt>
+        <dd>${language}</dd>
+      </div>
+      <div class="modal-details-item">
+        <dt>Category</dt>
+        <dd>${category}</dd>
+      </div>
+      <div class="modal-details-item">
+        <dt>Views</dt>
+        <dd>${formatNumber(trend.views)}</dd>
+      </div>
+      <div class="modal-details-item">
+        <dt>Likes</dt>
+        <dd>${formatNumber(trend.likes)}</dd>
+      </div>
+      <div class="modal-details-item">
+        <dt>Comments</dt>
+        <dd>${formatNumber(trend.comment_count)}</dd>
+      </div>
+      <div class="modal-details-item">
+        <dt>Engagement</dt>
+        <dd>${engagement}</dd>
+      </div>
+      <div class="modal-details-item">
+        <dt>Viral</dt>
+        <dd>${viral ? "Yes" : "No"}</dd>
+      </div>
+    </dl>
+  `;
+
+  const youtubeUrl = getYoutubeUrl(trend);
+  if (youtubeUrl) {
+    modalOpenYoutube.disabled = false;
+    modalOpenYoutube.dataset.url = youtubeUrl;
+  } else {
+    modalOpenYoutube.disabled = true;
+    modalOpenYoutube.dataset.url = "";
+  }
+
+  modal.classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+}
+
+function closeTrendModal() {
+  modal.classList.add("hidden");
+  document.body.style.overflow = "";
+  currentTrend = null;
+  modalOpenYoutube.dataset.url = "";
 }
 
 function populateFilterOptions(trends) {
@@ -290,10 +398,41 @@ function filterAndSort(trends) {
 }
 
 function renderTrends(trends) {
-  const list = filterAndSort(trends);
-  renderStats(list);
+  const filtered = filterAndSort(trends);
+  renderStats(filtered);
+
+  const total = filtered.length;
+  if (!Number.isFinite(pageSize) || pageSize <= 0) pageSize = 20;
+  const totalPages = total === 0 ? 1 : Math.max(1, Math.ceil(total / pageSize));
+
+  if (total === 0) {
+    currentPage = 1;
+    trendList.innerHTML = "";
+    paginationInfo.textContent = "No trends match the current filters.";
+    pageIndicator.textContent = "0 / 0";
+    pagePrev.disabled = true;
+    pageNext.disabled = true;
+    return;
+  }
+
+  if (currentPage > totalPages) currentPage = totalPages;
+  if (currentPage < 1) currentPage = 1;
+
+  const start = (currentPage - 1) * pageSize;
+  const end = Math.min(start + pageSize, total);
+  const pageItems = filtered.slice(start, end);
+
+  paginationInfo.textContent = `Showing ${start + 1}–${end} of ${total} trends`;
+  pageIndicator.textContent = `${currentPage} / ${totalPages}`;
+  pagePrev.disabled = currentPage === 1;
+  pageNext.disabled = currentPage === totalPages;
+
   trendList.innerHTML = "";
-  list.forEach((t) => trendList.appendChild(renderTrendCard(t)));
+  pageItems.forEach((t, idx) => {
+    const card = renderTrendCard(t);
+    card.style.animationDelay = `${idx * 35}ms`;
+    trendList.appendChild(card);
+  });
 }
 
 async function fetchTrends() {
@@ -345,15 +484,97 @@ async function refreshTrends() {
   }
 }
 
-filterViral.addEventListener("change", () => renderTrends(allTrends));
-filterCountry.addEventListener("change", () => renderTrends(allTrends));
-filterLanguage.addEventListener("change", () => renderTrends(allTrends));
-filterCategory.addEventListener("change", () => renderTrends(allTrends));
-filterEngagement.addEventListener("change", () => renderTrends(allTrends));
-filterTimeFrom.addEventListener("change", () => renderTrends(allTrends));
-filterTimeTo.addEventListener("change", () => renderTrends(allTrends));
-sortBy.addEventListener("change", () => renderTrends(allTrends));
+filterViral.addEventListener("change", () => {
+  currentPage = 1;
+  renderTrends(allTrends);
+});
+filterCountry.addEventListener("change", () => {
+  currentPage = 1;
+  renderTrends(allTrends);
+});
+filterLanguage.addEventListener("change", () => {
+  currentPage = 1;
+  renderTrends(allTrends);
+});
+filterCategory.addEventListener("change", () => {
+  currentPage = 1;
+  renderTrends(allTrends);
+});
+filterEngagement.addEventListener("change", () => {
+  currentPage = 1;
+  renderTrends(allTrends);
+});
+filterTimeFrom.addEventListener("change", () => {
+  currentPage = 1;
+  renderTrends(allTrends);
+});
+filterTimeTo.addEventListener("change", () => {
+  currentPage = 1;
+  renderTrends(allTrends);
+});
+sortBy.addEventListener("change", () => {
+  currentPage = 1;
+  renderTrends(allTrends);
+});
 btnRefresh.addEventListener("click", refreshTrends);
 btnRetry.addEventListener("click", loadTrends);
+
+modalClose.addEventListener("click", closeTrendModal);
+modalCloseSecondary.addEventListener("click", closeTrendModal);
+modalBackdrop.addEventListener("click", closeTrendModal);
+
+modalOpenYoutube.addEventListener("click", () => {
+  const url = modalOpenYoutube.dataset.url;
+  if (url) {
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !modal.classList.contains("hidden")) {
+    closeTrendModal();
+  }
+});
+
+pageSizeSelect.addEventListener("change", () => {
+  const val = Number(pageSizeSelect.value);
+  pageSize = Number.isFinite(val) && val > 0 ? val : 20;
+  currentPage = 1;
+  renderTrends(allTrends);
+  const mainEl = document.querySelector(".main");
+  if (mainEl) {
+    window.scrollTo({ top: mainEl.offsetTop - 70, behavior: "smooth" });
+  }
+});
+
+pagePrev.addEventListener("click", () => {
+  if (currentPage > 1) {
+    currentPage -= 1;
+    renderTrends(allTrends);
+    const mainEl = document.querySelector(".main");
+    if (mainEl) {
+      window.scrollTo({ top: mainEl.offsetTop - 70, behavior: "smooth" });
+    }
+  }
+});
+
+pageNext.addEventListener("click", () => {
+  currentPage += 1;
+  renderTrends(allTrends);
+  const mainEl = document.querySelector(".main");
+  if (mainEl) {
+    window.scrollTo({ top: mainEl.offsetTop - 70, behavior: "smooth" });
+  }
+});
+
+window.addEventListener("scroll", () => {
+  const max = 260;
+  const y = Math.min(window.scrollY || window.pageYOffset || 0, max);
+  const ratio = max ? y / max : 0;
+  if (headerEl) {
+    headerEl.classList.toggle("header-scrolled", y > 12);
+  }
+  rootStyle.setProperty("--scroll-glow", ratio.toFixed(3));
+});
 
 loadTrends();

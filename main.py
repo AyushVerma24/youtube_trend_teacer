@@ -59,6 +59,7 @@ def get_trending_videos(region="IN", max_results=50):
 
     for item in response["items"]:
         video_data = {
+            "video_id": item["id"],
             "title": item["snippet"]["title"],
             "category_id": item["snippet"]["categoryId"],
             "publish_time": item["snippet"]["publishedAt"],

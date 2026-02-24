@@ -104,8 +104,50 @@
     <ul class="trend-list" id="trend-list" aria-live="polite"></ul>
   </main>
 
+  <div class="modal hidden" id="trend-modal" aria-hidden="true">
+    <div class="modal-backdrop" id="trend-modal-backdrop"></div>
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="trend-modal-title">
+      <button type="button" class="modal-close" id="trend-modal-close" aria-label="Close details">×</button>
+      <div class="modal-content">
+        <h2 class="modal-title" id="trend-modal-title"></h2>
+        <p class="modal-subtitle" id="trend-modal-subtitle"></p>
+        <div class="modal-body" id="trend-modal-body"></div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="trend-modal-close-secondary">Close</button>
+          <button type="button" class="btn btn-primary" id="trend-modal-open-youtube">
+            Open on YouTube
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <footer class="footer">
-    <p>Data from YouTube API · Refreshing runs the analysis pipeline</p>
+    <div class="footer-inner">
+      <div class="footer-info" id="pagination-info">
+        <!-- Filled by JS -->
+      </div>
+      <div class="footer-page-size">
+        <label class="page-size-label">
+          Trends per page
+          <select id="page-size" aria-label="Trends per page">
+            <option value="10">10</option>
+            <option value="20" selected>20</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </label>
+      </div>
+      <div class="footer-pagination">
+        <button type="button" class="pager-btn" id="page-prev" aria-label="Previous page">
+          ‹
+        </button>
+        <span class="pager-indicator" id="page-indicator">1 / 1</span>
+        <button type="button" class="pager-btn" id="page-next" aria-label="Next page">
+          ›
+        </button>
+      </div>
+    </div>
   </footer>
 
   <script src="config.js"></script>
